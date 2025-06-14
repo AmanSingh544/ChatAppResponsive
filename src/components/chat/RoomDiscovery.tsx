@@ -24,61 +24,15 @@ interface RoomDiscoveryProps {
   availableRooms?: Room[];
 }
 
-// Mock data for available rooms to join
-const mockAvailableRooms: Room[] = [
-  {
-    id: "discover-1",
-    name: "General Discussion",
-    purpose: "chat",
-    isPrivate: false,
-    members: [
-      { id: "user-1", name: "Alice", status: "online" },
-      { id: "user-2", name: "Bob", status: "online" },
-      { id: "user-3", name: "Charlie", status: "away" },
-    ],
-  },
-  {
-    id: "discover-2",
-    name: "Project Updates",
-    purpose: "work",
-    isPrivate: false,
-    members: [
-      { id: "user-4", name: "David", status: "online" },
-      { id: "user-5", name: "Eve", status: "online" },
-    ],
-  },
-  {
-    id: "discover-3",
-    name: "Study Group",
-    purpose: "education",
-    isPrivate: false,
-    members: [
-      { id: "user-6", name: "Frank", status: "online" },
-      { id: "user-7", name: "Grace", status: "offline" },
-      { id: "user-8", name: "Henry", status: "online" },
-      { id: "user-9", name: "Ivy", status: "away" },
-    ],
-  },
-  {
-    id: "discover-4",
-    name: "Random Chats",
-    purpose: "gossip",
-    isPrivate: false,
-    members: [
-      { id: "user-10", name: "Jack", status: "online" },
-      { id: "user-11", name: "Kate", status: "online" },
-      { id: "user-12", name: "Leo", status: "online" },
-    ],
-  },
-];
 
 export function RoomDiscovery({
   isOpen,
   onClose,
   onJoinRoom,
   currentUser,
-  availableRooms = mockAvailableRooms,
+  availableRooms 
 }: RoomDiscoveryProps) {
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPurpose, setSelectedPurpose] = useState<string>("all");
   const { theme } = useTheme();
@@ -385,9 +339,12 @@ export function RoomDiscovery({
 
         {/* Rooms List */}
         <div style={roomsListStyle}>
-          {filteredRooms.map((room) => (
+          {
+            console.log(filteredRooms,'--------------filteredRooms---------------')
+          }
+          {availableRooms.map((room) => (
             <div
-              key={room.id}
+              key={room._id}
               style={roomCardStyle}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = getPurposeColor(
@@ -410,7 +367,7 @@ export function RoomDiscovery({
                 </h3>
                 <button
                   style={joinButtonStyle}
-                  onClick={() => handleJoinRoom(room.id)}
+                  onClick={() => handleJoinRoom(room._id)}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = "#2563eb";
                   }}

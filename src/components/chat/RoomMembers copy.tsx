@@ -73,8 +73,8 @@ export function RoomMembers({
     borderRadius: "16px",
     padding: "24px",
     width: "500px",
-    minHeight: "70vh",
-    maxHeight: "70vh",
+    minHeight: "68vh",
+    maxHeight: "68vh",
     display: "flex",
     flexDirection: "column",
     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
@@ -198,10 +198,9 @@ export function RoomMembers({
     border: "2px solid white",
   });
 
-  const suggestedUser = allUsers && allUsers.filter(user => room.members.every(roomU => user.username?.toLowerCase() !== roomU.username?.toLowerCase()));
-
-  const filteredData = activeTab === "members" ? (room.members.filter((member) => member.username.toLowerCase().includes(searchQuery.toLowerCase())))
-    : (suggestedUser && suggestedUser.filter(user => user.username?.toLowerCase().includes(searchQuery.toLowerCase())));
+  const filteredMembers = room.members.filter((member) =>
+    member.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const getStatusColor = (status: User["status"]) => {
     switch (status) {
@@ -282,7 +281,7 @@ export function RoomMembers({
         >
           <button
             style={tabStyle(activeTab === "members")}
-            onClick={() => { setActiveTab("members"); setSearchQuery("") }}
+            onClick={() => setActiveTab("members")}
           >
             <Users size={16} />
             Members
@@ -290,7 +289,7 @@ export function RoomMembers({
 
           <button
             style={tabStyle(activeTab === "add")}
-            onClick={() => { setActiveTab("add"); setSearchQuery("") }}
+            onClick={() => setActiveTab("add")}
           >
             <UserPlus size={16} />
             Add Members
@@ -317,11 +316,11 @@ export function RoomMembers({
           />
         </div>
 
-        <div style={contentStyle}>
+        <div >
           {activeTab === "members" ? (
             <div style={contentStyle}>
               {/* Members */}
-              {filteredData && filteredData.map((member) => (
+              {filteredMembers.map((member) => (
                 <div
                   key={member._id}
                   style={memberItemStyle}
@@ -392,7 +391,7 @@ export function RoomMembers({
                 Suggested People
               </h4> */}
                 {
-                  filteredData && filteredData?.map((user) => (
+                  allUsers.filter(user => room.members.every(roomU => user.username != roomU.username))?.map((user) => (
                     <div key={user._id} style={addMemberItemStyle}>
                       <div style={avatarStyle}>{getUserInitials(user.username)}
                         <div

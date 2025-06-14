@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTheme } from "next-themes";
 import { Room, RoomCreationData, PURPOSE_OPTIONS, User } from "@/types/chat";
 import { CreateRoomModal } from "./CreateRoomModal";
@@ -18,28 +18,33 @@ import {
   Clock,
   Plus,
 } from "lucide-react";
+import { getClientId } from "@/lib/clientId";
+import { useApiWithToast } from "@/hooks/useApiWithToast";
+import { roomsApi } from "@/api/roomApi";
+import { useNavigate } from 'react-router-dom';
 
 interface RoomSidebarProps {
-  rooms: Room[];
-  currentUser: User;
-  onCreateRoom: (roomData: RoomCreationData) => void;
-  onJoinRoom: (roomId: string) => void;
-  onOpenChat: (roomId: string) => void;
-  selectedRoomId?: string;
+  // rooms: Room[];
+  // currentUser: User;
+  // onCreateRoom: (roomData: RoomCreationData) => void;
+  // onJoinRoom: (roomId: string) => void;
+  // onOpenChat: (roomId: string) => void;
+  // selectedRoomId?: string;
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 export function RoomSidebar({
-  rooms,
-  currentUser,
-  onCreateRoom,
-  onJoinRoom,
-  onOpenChat,
-  selectedRoomId,
   isOpen = true,
   onClose,
 }: RoomSidebarProps) {
+  const { callApi } = useApiWithToast();
+  const currentUser = useRef(getClientId())?.current;
+
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
+  const [selectedRoomId, setSelectedRoomId] = useState<string>("");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "public" | "private">(
     "all",
@@ -50,8 +55,68 @@ export function RoomSidebar({
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  const navigate = useNavigate();
+
+  const getAllRooms = async () => {
+    const response = await callApi(() => roomsApi.getRooms(), {
+      successMessage: "Rooms fetched successfully!",
+      errorMessage: "Failed to fetch rooms",
+      onSuccess: () => console.log("Rooms fetched successful"),
+    });
+    if (response.success && response.data) {
+      setRooms(response?.data)
+      console.log("Room Details:", response.data); // response.data is Room
+    }
+  };
+
+  const fetchAvailableRooms = useCallback(async () => {
+    const response = await callApi(() => roomsApi.getAvailableRooms(), {
+      successMessage: "Available Room fetched successfully!",
+      errorMessage: "Failed to fetch Available room",
+      onSuccess: () => console.log("Available Room was fetched successfully"),
+      onError: (err) => console.error("Failed to fetch room", err),
+
+    });
+    if (response.success && response.data) {
+      setAvailableRooms(response?.data)
+      console.log("Available Room Details:", response.data); // response.data is Room
+    }
+  }, []);
+
+  const handleCreateRoom = useCallback(async (roomDataPayload: RoomCreationData) => {
+    const response = await callApi(() => roomsApi.createRoom(roomDataPayload), {
+      successMessage: "Room created successfully!",
+      errorMessage: "Failed to create room",
+      onSuccess: () => console.log("Room was created successfully"),
+    });
+    if (response.success && response.data) {
+      setRooms(response?.data)
+      console.log("Created Room:", response.data); // response.data is Room
+    };
+  }, []);
+
+  const handleJoinRoom = useCallback(async (roomId: string) => {
+    const response = await callApi(() => roomsApi.joinRoom(roomId), {
+      successMessage: "Joined room successfully!",
+      errorMessage: "Failed to join room",
+      onSuccess: () => console.log("Joined Room successfully"),
+    });
+    if (response.success && response.data) {
+      setSelectedRoomId(roomId);
+      console.log("Joined Room:", response.data); // response.data is Room
+      handleOpenChat(roomId);
+    };
+  }, []);
+
+  const handleOpenChat = (roomId: string) => {
+    navigate(`/dashboard/chat/${roomId}`, { state: { roomId: roomId } });
+
+  };
+
   useEffect(() => {
     setMounted(true);
+    getAllRooms();
+    fetchAvailableRooms();
   }, []);
 
   const filteredRooms = rooms.filter((room) => {
@@ -357,13 +422,13 @@ export function RoomSidebar({
       <div style={contentStyle}>
         {filteredRooms.map((room) => (
           <div
-            key={room.id}
+            key={room._id}
             style={roomCardStyle(
-              selectedRoomId === room.id,
-              hoveredRoom === room.id,
+              selectedRoomId === room._id,
+              hoveredRoom === room._id,
             )}
-            onClick={() => onOpenChat(room.id)}
-            onMouseEnter={() => setHoveredRoom(room.id)}
+            onClick={() => handleOpenChat(room._id)}
+            onMouseEnter={() => setHoveredRoom(room._id)}
             onMouseLeave={() => setHoveredRoom(null)}
           >
             <div style={roomNameStyle}>
@@ -510,15 +575,16 @@ export function RoomSidebar({
       <CreateRoomModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onCreateRoom={onCreateRoom}
+        onCreateRoom={handleCreateRoom}
       />
 
       {/* Room Discovery Modal */}
       <RoomDiscovery
         isOpen={isDiscoveryOpen}
         onClose={() => setIsDiscoveryOpen(false)}
-        onJoinRoom={onJoinRoom}
+        onJoinRoom={handleJoinRoom}
         currentUser={currentUser}
+        availableRooms={availableRooms}
       />
     </div>
   );

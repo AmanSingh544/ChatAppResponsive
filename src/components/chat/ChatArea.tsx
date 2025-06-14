@@ -22,6 +22,7 @@ interface ChatAreaProps {
   room: Room | null;
   messages: Message[];
   currentUser: User;
+  allUsers: User[];
   onSendMessage: (content: string) => void;
   onAddMembers: () => void;
 }
@@ -50,6 +51,7 @@ export function ChatArea({
   room,
   messages,
   currentUser,
+  allUsers,
   onSendMessage,
   onAddMembers,
 }: ChatAreaProps) {
@@ -81,7 +83,7 @@ export function ChatArea({
       setIsHeaderVisible(true);
       setIsHeaderExpanded(false);
     }
-  }, [room?.id]);
+  }, [room?._id]);
 
   // Get theme-aware colors
   const getThemeColors = () => {
@@ -424,11 +426,11 @@ export function ChatArea({
                 </h4>
                 <div style={membersListStyle}>
                   {room.members.slice(0, 6).map((member) => (
-                    <div key={member.id} style={memberBadgeStyle}>
+                    <div key={member._id} style={memberBadgeStyle}>
                       <div style={memberAvatarStyle}>
-                        {getUserInitials(member.name)}
+                        {getUserInitials(member.username)}
                       </div>
-                      <span>{member.name}</span>
+                      <span>{member.username}</span>
                     </div>
                   ))}
                   {room.members.length > 6 && (
@@ -504,6 +506,7 @@ export function ChatArea({
         onClose={() => setIsMembersModalOpen(false)}
         room={room}
         currentUser={currentUser}
+        allUsers={allUsers}
         onAddMembers={onAddMembers}
         onRemoveMember={(userId) => {
           // In a real app, this would remove the member from the room

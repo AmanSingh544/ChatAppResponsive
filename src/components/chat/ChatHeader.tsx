@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { User } from "@/types/chat";
 import {
@@ -17,15 +17,14 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { getClientId } from "@/lib/clientId";
 
 interface ChatHeaderProps {
-  currentUser: User;
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
 }
 
 export function ChatHeader({
-  currentUser,
   isSidebarOpen = true,
   onToggleSidebar,
 }: ChatHeaderProps) {
@@ -34,6 +33,9 @@ export function ChatHeader({
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+
+  const currentUser = useRef(getClientId())?.current;
+  console.log(currentUser, 'currentuser')
 
   // Ensure component is mounted to avoid hydration mismatch
   useEffect(() => {
@@ -488,7 +490,7 @@ export function ChatHeader({
                 {currentUser.avatar ? (
                   <img
                     src={currentUser.avatar}
-                    alt={currentUser.name}
+                    alt={currentUser.username}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -496,7 +498,7 @@ export function ChatHeader({
                     }}
                   />
                 ) : (
-                  currentUser.name.charAt(0).toUpperCase()
+                  currentUser.username?.charAt(0).toUpperCase()
                 )}
                 <div style={avatarStatusStyle}></div>
               </div>
@@ -505,7 +507,7 @@ export function ChatHeader({
                 style={{ ...userInfoStyle, ...mobileHiddenStyle }}
                 className="mobile-hidden"
               >
-                <p style={userNameStyle}>{currentUser.name}</p>
+                <p style={userNameStyle}>{currentUser.username}</p>
                 <p style={userStatusStyle}>
                   {getStatusText(currentUser.status)}
                 </p>
@@ -523,7 +525,7 @@ export function ChatHeader({
                     {currentUser.avatar ? (
                       <img
                         src={currentUser.avatar}
-                        alt={currentUser.name}
+                        alt={currentUser.username}
                         style={{
                           width: "100%",
                           height: "100%",
@@ -531,7 +533,7 @@ export function ChatHeader({
                         }}
                       />
                     ) : (
-                      currentUser.name.charAt(0).toUpperCase()
+                      currentUser.username?.charAt(0).toUpperCase()
                     )}
                   </div>
                   <div>
@@ -543,7 +545,7 @@ export function ChatHeader({
                         color: colors.dropdownText,
                       }}
                     >
-                      {currentUser.name}
+                      {currentUser.username}
                     </p>
                     <p
                       style={{
