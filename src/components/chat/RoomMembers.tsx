@@ -36,6 +36,12 @@ export function RoomMembers({
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const getThemeColors = () => {
     if (!mounted) {
       return {
@@ -61,12 +67,7 @@ export function RoomMembers({
     };
   };
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const colors = getThemeColors();
-
 
   const modalStyle: React.CSSProperties = {
     background: colors.modalBg,
@@ -91,7 +92,7 @@ export function RoomMembers({
   const titleStyle: React.CSSProperties = {
     fontSize: "20px",
     fontWeight: "600",
-    color: "#374151",
+    color: colors.textColor,
     margin: 0,
     display: "flex",
     alignItems: "center",
@@ -163,14 +164,13 @@ export function RoomMembers({
     alignItems: "center",
     gap: "12px",
     padding: "12px",
-    background: "#f9fafb",
+    background: colors.cardBg,
     border: "1px solid #e5e7eb",
     borderRadius: "8px",
     marginBottom: "8px",
   };
   const addMemberItemStyle: React.CSSProperties = {
     ...memberItemStyle,
-    background: "#f0f9ff",
     border: "1px solid #0ea5e9",
   };
   const avatarStyle: React.CSSProperties = {
@@ -405,7 +405,7 @@ export function RoomMembers({
                             margin: 0,
                             fontWeight: "600",
                             fontSize: "14px",
-                            color: "#374151",
+                            color: colors.textColor,
                           }}
                         >
                           {user.username}

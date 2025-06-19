@@ -35,12 +35,37 @@ export function ChatHeader({
   const [mounted, setMounted] = useState(false);
 
   const currentUser = useRef(getClientId())?.current;
-  console.log(currentUser, 'currentuser')
+  const dropDownRef = useRef<HTMLDivElement>(null);
 
   // Ensure component is mounted to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
+
+const dropdownRef = useRef<HTMLDivElement>(null);
+const buttonRef = useRef<HTMLButtonElement>(null);
+
+useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node) &&
+      buttonRef.current &&
+      !buttonRef.current.contains(event.target as Node)
+    ) {
+      setShowUserMenu(false);
+    }
+  }
+
+  if (showUserMenu) {
+    document.addEventListener("click", handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener("click", handleClickOutside);
+  };
+}, [showUserMenu]);
+
 
   const getStatusColor = (status: User["status"]) => {
     switch (status) {
@@ -337,9 +362,10 @@ export function ChatHeader({
   };
 
   return (
-    <div style={headerStyle}>
-      <style>
-        {`
+    <>
+      <div style={headerStyle}>
+        <style>
+          {`
           @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.8; }
@@ -384,288 +410,291 @@ export function ChatHeader({
             .desktop-hidden { display: none !important; }
           }
         `}
-      </style>
+        </style>
 
-      <div style={containerStyle}>
-        {/* Left Section - Logo & Title */}
-        <div style={leftSectionStyle}>
-          {/* Sidebar Toggle Button */}
-          {onToggleSidebar && (
+        <div style={containerStyle}>
+          {/* Left Section - Logo & Title */}
+          <div style={leftSectionStyle}>
+            {/* Sidebar Toggle Button */}
+            {onToggleSidebar && (
+              <button
+                style={iconButtonStyle}
+                className="icon-button"
+                onClick={onToggleSidebar}
+                aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+              >
+                {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            )}
+
+            <div style={logoContainerStyle}>
+              <div style={logoStyle} className="logo">
+                <MessageSquare size={20} />
+              </div>
+              <div style={pulseDotStyle}></div>
+            </div>
+
+            <div style={titleSectionStyle}>
+              <h1 style={titleStyle}>
+                <span className="mobile-hidden">💬 Chat Dashboard</span>
+                <span
+                  className="title-desktop"
+                  style={{ display: window.innerWidth >= 640 ? "none" : "block" }}
+                >
+                  💬 Chat
+                </span>
+              </h1>
+              <p style={subtitleStyle} className="mobile-hidden">
+                Stay connected with your team
+              </p>
+            </div>
+          </div>
+
+          {/* Right Section - User Info & Controls */}
+          <div style={rightSectionStyle}>
+            {/* Search Button (Mobile/Tablet) */}
             <button
               style={iconButtonStyle}
-              className="icon-button"
-              onClick={onToggleSidebar}
-              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+              className="icon-button desktop-hidden"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              aria-label="Search"
             >
-              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+              <Search size={16} />
             </button>
-          )}
 
-          <div style={logoContainerStyle}>
-            <div style={logoStyle} className="logo">
-              <MessageSquare size={20} />
-            </div>
-            <div style={pulseDotStyle}></div>
-          </div>
-
-          <div style={titleSectionStyle}>
-            <h1 style={titleStyle}>
-              <span className="mobile-hidden">💬 Chat Dashboard</span>
-              <span
-                className="title-desktop"
-                style={{ display: window.innerWidth >= 640 ? "none" : "block" }}
-              >
-                💬 Chat
-              </span>
-            </h1>
-            <p style={subtitleStyle} className="mobile-hidden">
-              Stay connected with your team
-            </p>
-          </div>
-        </div>
-
-        {/* Right Section - User Info & Controls */}
-        <div style={rightSectionStyle}>
-          {/* Search Button (Mobile/Tablet) */}
-          <button
-            style={iconButtonStyle}
-            className="icon-button desktop-hidden"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            aria-label="Search"
-          >
-            <Search size={16} />
-          </button>
-
-          {/* Notifications Toggle */}
-          <button
-            style={{
-              ...iconButtonStyle,
-              position: "relative",
-            }}
-            className="icon-button"
-            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-            aria-label={
-              notificationsEnabled
-                ? "Disable notifications"
-                : "Enable notifications"
-            }
-          >
-            {notificationsEnabled ? <Bell size={16} /> : <BellOff size={16} />}
-            {notificationsEnabled && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "4px",
-                  right: "4px",
-                  width: "8px",
-                  height: "8px",
-                  background: "#ef4444",
-                  borderRadius: "50%",
-                  animation: "pulse 1.5s infinite",
-                }}
-              ></div>
-            )}
-          </button>
-
-          {/* User Status & Info */}
-          <div
-            style={{ ...statusIndicatorStyle, ...tabletHiddenStyle }}
-            className="tablet-hidden"
-          >
-            <div style={statusDotStyle}></div>
-            <span style={{ fontSize: "14px", fontWeight: "500" }}>
-              {getStatusText(currentUser.status)}
-            </span>
-          </div>
-
-          {/* User Avatar & Menu */}
-          <div style={{ position: "relative" }}>
+            {/* Notifications Toggle */}
             <button
-              style={userButtonStyle}
-              className="user-button"
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              aria-label="User menu"
+              style={{
+                ...iconButtonStyle,
+                position: "relative",
+              }}
+              className="icon-button"
+              onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+              aria-label={
+                notificationsEnabled
+                  ? "Disable notifications"
+                  : "Enable notifications"
+              }
             >
-              <div style={avatarStyle}>
-                {currentUser.avatar ? (
-                  <img
-                    src={currentUser.avatar}
-                    alt={currentUser.username}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "50%",
-                    }}
-                  />
-                ) : (
-                  currentUser.username?.charAt(0).toUpperCase()
-                )}
-                <div style={avatarStatusStyle}></div>
-              </div>
-
-              <div
-                style={{ ...userInfoStyle, ...mobileHiddenStyle }}
-                className="mobile-hidden"
-              >
-                <p style={userNameStyle}>{currentUser.username}</p>
-                <p style={userStatusStyle}>
-                  {getStatusText(currentUser.status)}
-                </p>
-              </div>
-
-              <MoreVertical size={16} className="mobile-hidden" />
+              {notificationsEnabled ? <Bell size={16} /> : <BellOff size={16} />}
+              {notificationsEnabled && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "4px",
+                    right: "4px",
+                    width: "8px",
+                    height: "8px",
+                    background: "#ef4444",
+                    borderRadius: "50%",
+                    animation: "pulse 1.5s infinite",
+                  }}
+                ></div>
+              )}
             </button>
 
-            {showUserMenu && (
-              <div style={dropdownStyle}>
-                <div style={dropdownHeaderStyle}>
-                  <div
-                    style={{ ...avatarStyle, width: "32px", height: "32px" }}
-                  >
-                    {currentUser.avatar ? (
-                      <img
-                        src={currentUser.avatar}
-                        alt={currentUser.username}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          borderRadius: "50%",
-                        }}
-                      />
-                    ) : (
-                      currentUser.username?.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div>
-                    <p
+            {/* User Status & Info */}
+            <div
+              style={{ ...statusIndicatorStyle, ...tabletHiddenStyle }}
+              className="tablet-hidden"
+            >
+              <div style={statusDotStyle}></div>
+              <span style={{ fontSize: "14px", fontWeight: "500" }}>
+                {getStatusText(currentUser.status)}
+              </span>
+            </div>
+
+            {/* User Avatar & Menu */}
+            <div style={{ position: "relative" }} ref={dropDownRef}>
+              <button
+              ref= {buttonRef}
+                style={userButtonStyle}
+                className="user-button"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                aria-label="User menu"
+              >
+                <div style={avatarStyle}>
+                  {currentUser.avatar ? (
+                    <img
+                      src={currentUser.avatar}
+                      alt={currentUser.username}
                       style={{
-                        margin: 0,
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: colors.dropdownText,
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "50%",
                       }}
-                    >
-                      {currentUser.username}
-                    </p>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: "12px",
-                        color: theme === "dark" ? "#94a3b8" : "#6b7280",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      <Circle
-                        size={8}
-                        style={{
-                          fill: getStatusColor(currentUser.status),
-                          color: getStatusColor(currentUser.status),
-                        }}
-                      />
-                      {getStatusText(currentUser.status)}
-                    </p>
-                  </div>
+                    />
+                  ) : (
+                    currentUser.username?.charAt(0).toUpperCase()
+                  )}
+                  <div style={avatarStatusStyle}></div>
                 </div>
 
-                <div style={{ padding: "4px 0" }}>
-                  <button style={dropdownItemStyle} className="dropdown-item">
-                    <UserIcon size={16} />
-                    Profile Settings
-                  </button>
-
-                  <button style={dropdownItemStyle} className="dropdown-item">
-                    <Users size={16} />
-                    Manage Teams
-                  </button>
-
-                  <button
-                    style={dropdownItemStyle}
-                    className="dropdown-item"
-                    onClick={() =>
-                      setNotificationsEnabled(!notificationsEnabled)
-                    }
-                  >
-                    {notificationsEnabled ? (
-                      <BellOff size={16} />
-                    ) : (
-                      <Bell size={16} />
-                    )}
-                    {notificationsEnabled ? "Disable" : "Enable"} Notifications
-                  </button>
-
-                  <button
-                    style={dropdownItemStyle}
-                    className="dropdown-item"
-                    onClick={() =>
-                      setTheme(theme === "dark" ? "light" : "dark")
-                    }
-                  >
-                    {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                    {theme === "dark" ? "Light" : "Dark"} Mode
-                  </button>
-
-                  <button style={dropdownItemStyle} className="dropdown-item">
-                    <Settings size={16} />
-                    Settings
-                  </button>
-
-                  <div
-                    style={{
-                      height: "1px",
-                      background: colors.dropdownBorder,
-                      margin: "4px 0",
-                    }}
-                  ></div>
-
-                  <button
-                    style={{
-                      ...dropdownItemStyle,
-                      color: theme === "dark" ? "#ef4444" : "#dc2626",
-                    }}
-                    className="dropdown-item"
-                  >
-                    <LogOut size={16} />
-                    Sign Out
-                  </button>
+                <div
+                  style={{ ...userInfoStyle, ...mobileHiddenStyle }}
+                  className="mobile-hidden"
+                >
+                  <p style={userNameStyle}>{currentUser.username}</p>
+                  <p style={userStatusStyle}>
+                    {getStatusText(currentUser.status)}
+                  </p>
                 </div>
-              </div>
-            )}
+
+                <MoreVertical size={16} className="mobile-hidden" />
+              </button>
+
+              {showUserMenu && (
+                <div style={dropdownStyle}>
+                  <div style={dropdownHeaderStyle}>
+                    <div
+                      style={{ ...avatarStyle, width: "32px", height: "32px" }}
+                    >
+                      {currentUser.avatar ? (
+                        <img
+                          src={currentUser.avatar}
+                          alt={currentUser.username}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      ) : (
+                        currentUser.username?.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <div>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          color: colors.dropdownText,
+                        }}
+                      >
+                        {currentUser.username}
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: "12px",
+                          color: theme === "dark" ? "#94a3b8" : "#6b7280",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <Circle
+                          size={8}
+                          style={{
+                            fill: getStatusColor(currentUser.status),
+                            color: getStatusColor(currentUser.status),
+                          }}
+                        />
+                        {getStatusText(currentUser.status)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: "4px 0" }}>
+                    <button style={dropdownItemStyle} className="dropdown-item">
+                      <UserIcon size={16} />
+                      Profile Settings
+                    </button>
+
+                    <button style={dropdownItemStyle} className="dropdown-item">
+                      <Users size={16} />
+                      Manage Teams
+                    </button>
+
+                    <button
+                      style={dropdownItemStyle}
+                      className="dropdown-item"
+                      onClick={() =>
+                        setNotificationsEnabled(!notificationsEnabled)
+                      }
+                    >
+                      {notificationsEnabled ? (
+                        <BellOff size={16} />
+                      ) : (
+                        <Bell size={16} />
+                      )}
+                      {notificationsEnabled ? "Disable" : "Enable"} Notifications
+                    </button>
+
+                    <button
+                      style={dropdownItemStyle}
+                      className="dropdown-item"
+                      onClick={() =>
+                        setTheme(theme === "dark" ? "light" : "dark")
+                      }
+                    >
+                      {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                      {theme === "dark" ? "Light" : "Dark"} Mode
+                    </button>
+
+                    <button style={dropdownItemStyle} className="dropdown-item">
+                      <Settings size={16} />
+                      Settings
+                    </button>
+
+                    <div
+                      style={{
+                        height: "1px",
+                        background: colors.dropdownBorder,
+                        margin: "4px 0",
+                      }}
+                    ></div>
+
+                    <button
+                      style={{
+                        ...dropdownItemStyle,
+                        color: theme === "dark" ? "#ef4444" : "#dc2626",
+                      }}
+                      className="dropdown-item"
+                    >
+                      <LogOut size={16} />
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Mobile Search Bar */}
+        {isSearchOpen && (
+          <div style={searchBarStyle}>
+            <div style={{ position: "relative" }}>
+              <Search size={16} style={searchIconStyle} />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                style={searchInputStyle}
+                className="search-input"
+                autoFocus
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Click outside to close menu */}
+        {showUserMenu && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 40,
+            }}
+            onClick={() => setShowUserMenu(false)}
+          />
+        )}
       </div>
-
-      {/* Mobile Search Bar */}
-      {isSearchOpen && (
-        <div style={searchBarStyle}>
-          <div style={{ position: "relative" }}>
-            <Search size={16} style={searchIconStyle} />
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              style={searchInputStyle}
-              className="search-input"
-              autoFocus
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Click outside to close menu */}
-      {showUserMenu && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 40,
-          }}
-          onClick={() => setShowUserMenu(false)}
-        />
-      )}
-    </div>
+    </>
   );
 }
+

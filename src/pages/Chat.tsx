@@ -9,6 +9,7 @@ import { Outlet, useParams } from "react-router-dom";
 import { roomsApi } from "@/api/roomApi";
 import { useApiWithToast } from "@/hooks/useApiWithToast";
 import { userApi } from "@/api/userApi";
+import { useNetworkCheck } from '@/hooks/network-context';
 
 // Mock data
 // const mockCurrentUser: User = {
@@ -235,6 +236,8 @@ export default function Chat() {
   );
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
 
+  const {isOnline} = useNetworkCheck();
+  console.log(isOnline, '----isonline -----');
   useEffect(() => {
     if (roomId) {
       setSelectedRoomId(roomId);
