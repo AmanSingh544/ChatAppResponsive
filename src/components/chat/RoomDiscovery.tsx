@@ -30,7 +30,7 @@ export function RoomDiscovery({
   onClose,
   onJoinRoom,
   currentUser,
-  availableRooms 
+  availableRooms
 }: RoomDiscoveryProps) {
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,8 +74,8 @@ export function RoomDiscovery({
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesPurpose =
-      selectedPurpose === "all" || room.purpose === selectedPurpose;
-    return matchesSearch && matchesPurpose && !room.isPrivate; // Only show public rooms
+      selectedPurpose === "all" || room.purpose.toLowerCase() === selectedPurpose;
+    return matchesSearch && matchesPurpose;//&& !room.isPrivate; // Only show public rooms
   });
 
   const getPurposeIcon = (purpose: string) => {
@@ -234,18 +234,20 @@ export function RoomDiscovery({
   };
 
   const roomTitleStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
+    //  display: "flex",
+    // alignItems: "center",
+    // gap: "8px",
     fontSize: "16px",
     fontWeight: "600",
     color: colors.textColor,
     margin: 0,
+    textWrapStyle: "pretty"
   };
 
   const roomMetaStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: "12px",
     fontSize: "12px",
     color: colors.mutedText,
@@ -261,7 +263,7 @@ export function RoomDiscovery({
     fontWeight: "500",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    display: "flex",
+    // display: "flex",
     alignItems: "center",
     gap: "4px",
   };
@@ -339,10 +341,7 @@ export function RoomDiscovery({
 
         {/* Rooms List */}
         <div style={roomsListStyle}>
-          {
-            console.log(filteredRooms,'--------------filteredRooms---------------')
-          }
-          {availableRooms.map((room) => (
+          {filteredRooms && filteredRooms.length > 0 ? (filteredRooms.map((room) => (
             <div
               key={room._id}
               style={roomCardStyle}
@@ -360,10 +359,13 @@ export function RoomDiscovery({
               <div style={roomHeaderStyle}>
                 <h3 style={roomTitleStyle}>
                   <div style={{ color: getPurposeColor(room.purpose) }}>
-                    {getPurposeIcon(room.purpose)}
+                  {getPurposeIcon(room.purpose.toLowerCase())}
                   </div>
                   {room.name}
-                  <Globe size={14} style={{ color: colors.mutedText }} />
+                </h3>
+                <h3 >
+                  {room.purpose.toLowerCase() === "public" ? <Globe size={14} style={{ color: colors.mutedText }} />
+                    : <Lock size={14} style={{ color: colors.mutedText }} />}
                 </h3>
                 <button
                   style={joinButtonStyle}
@@ -396,31 +398,31 @@ export function RoomDiscovery({
                   <Users size={12} style={{ marginRight: "4px" }} />
                   {room.members.length} members
                 </span>
-                <span>Public room</span>
+                <span>{room.isPrivate ? "Private" : "Public"}</span>
               </div>
             </div>
-          ))}
-
-          {filteredRooms.length === 0 && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "40px 20px",
-                color: colors.mutedText,
-              }}
-            >
-              <Globe
-                size={48}
-                style={{ margin: "0 auto 16px", opacity: 0.5 }}
-              />
-              <p style={{ margin: 0, fontSize: "16px", fontWeight: "500" }}>
-                No public rooms found
-              </p>
-              <p style={{ margin: "8px 0 0", fontSize: "14px" }}>
-                Try adjusting your search or create a new room
-              </p>
-            </div>
-          )}
+          )))
+            : (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "40px 20px",
+                  color: colors.mutedText,
+                }}
+              >
+                <Globe
+                  size={48}
+                  style={{ margin: "0 auto 16px", opacity: 0.5 }}
+                />
+                <p style={{ margin: 0, fontSize: "16px", fontWeight: "500" }}>
+                  No public rooms found
+                </p>
+                <p style={{ margin: "8px 0 0", fontSize: "14px" }}>
+                  Try adjusting your search or create a new room
+                </p>
+              </div>
+            )
+          }
         </div>
       </div>
     </div>

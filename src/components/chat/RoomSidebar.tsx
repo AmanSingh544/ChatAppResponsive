@@ -104,11 +104,13 @@ export function RoomSidebar({
     if (response.success && response.data) {
       setSelectedRoomId(roomId);
       console.log("Joined Room:", response.data); // response.data is Room
-      handleOpenChat(roomId);
+      setRooms(prev => [...prev, response.data]);
+      setAvailableRooms(prev => prev.filter(pr => pr._id !== response.data._id));
     };
   }, []);
 
   const handleOpenChat = (roomId: string) => {
+    setSelectedRoomId(roomId);
     navigate(`/dashboard/chat/${roomId}`, { state: { roomId: roomId } });
 
   };
@@ -216,7 +218,7 @@ export function RoomSidebar({
   };
 
   const headerStyle: React.CSSProperties = {
-    padding: "20px",
+    padding: "10px",
     borderBottom: `1px solid ${colors.borderColor}`,
     background: colors.headerBg,
     color: "white",

@@ -144,7 +144,6 @@ const Layout = () => {
     return (
         <>
             <div style={containerStyle} className="bg-slate-50 dark:bg-slate-900">
-                <h1>hii welcomme to the future</h1>
                 {/* Header top bar  */}
                 <ChatHeader
                     isSidebarOpen={isSidebarOpen}

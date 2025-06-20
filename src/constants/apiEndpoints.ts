@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000/';
+const API_BASE_URL = 'https://jb10300w-3000.inc1.devtunnels.ms/'// 'http://localhost:3000/';
 //const API_BASE_URL = 'https://chat-application-l78n.onrender.com/'; 
 
 const API_ENDPOINTS = {

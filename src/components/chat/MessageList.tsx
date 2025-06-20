@@ -203,7 +203,7 @@ export function MessageList({
     fontSize: "12px",
     fontWeight: "500",
     color: colors.mutedText,
-    marginBottom: "2px",
+    marginBottom: "5px",
     paddingLeft: "12px",
   };
 
@@ -216,7 +216,7 @@ export function MessageList({
     wordWrap: "break-word",
     position: "relative",
     boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-
+    marginBottom: '3px',
     minHeight: "36px", // Ensure enough space for time/status
 
   });
