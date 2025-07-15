@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { getClientId } from "@/lib/clientId";
+import { useAuth } from "@/hooks/useAuth-context";
 
 interface ChatHeaderProps {
   isSidebarOpen?: boolean;
@@ -36,36 +37,36 @@ export function ChatHeader({
 
   const currentUser = useRef(getClientId())?.current;
   const dropDownRef = useRef<HTMLDivElement>(null);
+  const { setLogout } = useAuth();
 
   // Ensure component is mounted to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-const dropdownRef = useRef<HTMLDivElement>(null);
-const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-useEffect(() => {
-  function handleClickOutside(event: MouseEvent) {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target as Node) &&
-      buttonRef.current &&
-      !buttonRef.current.contains(event.target as Node)
-    ) {
-      setShowUserMenu(false);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setShowUserMenu(false);
+      }
     }
-  }
 
-  if (showUserMenu) {
-    document.addEventListener("click", handleClickOutside);
-  }
+    if (showUserMenu) {
+      document.addEventListener("click", handleClickOutside);
+    }
 
-  return () => {
-    document.removeEventListener("click", handleClickOutside);
-  };
-}, [showUserMenu]);
-
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   const getStatusColor = (status: User["status"]) => {
     switch (status) {
@@ -361,6 +362,10 @@ useEffect(() => {
     display: window.innerWidth >= 1024 ? "none" : "flex",
   };
 
+  const handleLogout = () => {
+    setLogout();
+  };
+
   return (
     <>
       <div style={headerStyle}>
@@ -439,7 +444,9 @@ useEffect(() => {
                 <span className="mobile-hidden">💬 Chat Dashboard</span>
                 <span
                   className="title-desktop"
-                  style={{ display: window.innerWidth >= 640 ? "none" : "block" }}
+                  style={{
+                    display: window.innerWidth >= 640 ? "none" : "block",
+                  }}
                 >
                   💬 Chat
                 </span>
@@ -476,7 +483,11 @@ useEffect(() => {
                   : "Enable notifications"
               }
             >
-              {notificationsEnabled ? <Bell size={16} /> : <BellOff size={16} />}
+              {notificationsEnabled ? (
+                <Bell size={16} />
+              ) : (
+                <BellOff size={16} />
+              )}
               {notificationsEnabled && (
                 <div
                   style={{
@@ -507,7 +518,7 @@ useEffect(() => {
             {/* User Avatar & Menu */}
             <div style={{ position: "relative" }} ref={dropDownRef}>
               <button
-              ref= {buttonRef}
+                ref={buttonRef}
                 style={userButtonStyle}
                 className="user-button"
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -619,7 +630,8 @@ useEffect(() => {
                       ) : (
                         <Bell size={16} />
                       )}
-                      {notificationsEnabled ? "Disable" : "Enable"} Notifications
+                      {notificationsEnabled ? "Disable" : "Enable"}{" "}
+                      Notifications
                     </button>
 
                     <button
@@ -629,7 +641,11 @@ useEffect(() => {
                         setTheme(theme === "dark" ? "light" : "dark")
                       }
                     >
-                      {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                      {theme === "dark" ? (
+                        <Sun size={16} />
+                      ) : (
+                        <Moon size={16} />
+                      )}
                       {theme === "dark" ? "Light" : "Dark"} Mode
                     </button>
 
@@ -652,6 +668,7 @@ useEffect(() => {
                         color: theme === "dark" ? "#ef4444" : "#dc2626",
                       }}
                       className="dropdown-item"
+                      onClick={handleLogout}
                     >
                       <LogOut size={16} />
                       Sign Out
@@ -697,4 +714,3 @@ useEffect(() => {
     </>
   );
 }
-

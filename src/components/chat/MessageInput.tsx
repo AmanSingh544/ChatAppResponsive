@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { Smile, Send, Paperclip, Image, Mic } from "lucide-react";
+import Picker from "emoji-picker-react";
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void;
@@ -147,6 +148,13 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
     background: isRecording ? "rgba(239, 68, 68, 0.1)" : "transparent",
   };
 
+  const [showPicker, setShowPicker] = useState(false);
+  const inputRef = useRef(null);
+  const onEmojiClick = (emojiData) => {
+    setMessage((prev) => prev + emojiData.emoji);
+    inputRef.current.focus();
+  };
+
   return (
     <div style={containerStyle}>
       <div
@@ -177,6 +185,36 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
           >
             <Paperclip size={18} />
           </button>
+          <button
+            style={actionButtonStyle}
+            disabled={disabled}
+            onClick={() => setShowPicker((prev) => !prev)}
+            title="Add emoji"
+          >
+            <Smile size={18} />
+          </button>
+          {showPicker && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "15rem",
+                left: "20rem",
+                // boxShadow: 3,
+              }}
+            >
+              <div
+                style={{
+                  transform: `scale(${0.7})`,
+                  transformOrigin: "top left",
+                  display: "inline-block",
+                }}
+              >
+                <div style={{ maxHeight: "10rem" }}>
+                  <Picker onEmojiClick={onEmojiClick} />
+                </div>
+              </div>
+            </div>
+          )}
           <button
             style={actionButtonStyle}
             disabled={disabled}
@@ -211,13 +249,6 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
                 title={isRecording ? "Stop recording" : "Voice message"}
               >
                 <Mic size={18} />
-              </button>
-              <button
-                style={actionButtonStyle}
-                disabled={disabled}
-                title="Add emoji"
-              >
-                <Smile size={18} />
               </button>
             </>
           )}

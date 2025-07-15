@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { User, Room } from "@/types/chat";
-import {
-  X,
-  Users,
-  Crown,
-  UserPlus,
-  MessageCircle,
-  Search
-} from "lucide-react";
+import { X, Users, Crown, UserPlus, MessageCircle, Search } from "lucide-react";
 
 interface RoomMembersProps {
   isOpen: boolean;
@@ -16,7 +9,7 @@ interface RoomMembersProps {
   room: Room;
   currentUser: User;
   allUsers: User[];
-  onAddMembers?: () => void;
+  onAddMembers?: (users: []) => void;
   onRemoveMember?: (userId: string) => void;
   onPromoteMember?: (userId: string) => void;
 }
@@ -35,8 +28,6 @@ export function RoomMembers({
   const [activeTab, setActiveTab] = useState<"members" | "add">("members");
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
-
 
   useEffect(() => {
     setMounted(true);
@@ -145,7 +136,6 @@ export function RoomMembers({
     display: "flex",
     flexDirection: "column",
     gap: "8px",
-
   };
   const addButtonStyle: React.CSSProperties = {
     background: "#10b981",
@@ -198,10 +188,24 @@ export function RoomMembers({
     border: "2px solid white",
   });
 
-  const suggestedUser = allUsers && allUsers.filter(user => room.members.every(roomU => user.username?.toLowerCase() !== roomU.username?.toLowerCase()));
+  const suggestedUser =
+    allUsers &&
+    allUsers.filter((user) =>
+      room.members.every(
+        (roomU) =>
+          user.username?.toLowerCase() !== roomU.username?.toLowerCase(),
+      ),
+    );
 
-  const filteredData = activeTab === "members" ? (room.members.filter((member) => member.username.toLowerCase().includes(searchQuery.toLowerCase())))
-    : (suggestedUser && suggestedUser.filter(user => user.username?.toLowerCase().includes(searchQuery.toLowerCase())));
+  const filteredData =
+    activeTab === "members"
+      ? room.members.filter((member) =>
+          member.username.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+      : suggestedUser &&
+        suggestedUser.filter((user) =>
+          user.username?.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
 
   const getStatusColor = (status: User["status"]) => {
     switch (status) {
@@ -238,6 +242,29 @@ export function RoomMembers({
       .slice(0, 2);
   };
 
+  const debounceCollect = (func, delay) => {
+    let timerid = null;
+    let members = [];
+
+    return function (userId) {
+      members.push(userId);
+      clearTimeout(timerid);
+      timerid = setTimeout(() => {
+        func(members);
+        members = [];
+      }, delay);
+    };
+  };
+
+  const debouncedAddMembers = debounceCollect(
+    (userIds) => onAddMembers(userIds),
+    2000,
+  );
+
+  const handleAddMembers = (userId) => {
+    debouncedAddMembers(userId);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -254,35 +281,26 @@ export function RoomMembers({
       }}
       onClick={onClose}
     >
-      <div
-        style={modalStyle}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div
-          style={headerStyle}
-        >
-          <h2
-            style={titleStyle}
-          >
+        <div style={headerStyle}>
+          <h2 style={titleStyle}>
             <Users size={20} />
             Room Management
           </h2>
-          <button
-            style={closeButtonStyle}
-            onClick={onClose}
-          >
+          <button style={closeButtonStyle} onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div
-          style={tabsContainerStyle}
-        >
+        <div style={tabsContainerStyle}>
           <button
             style={tabStyle(activeTab === "members")}
-            onClick={() => { setActiveTab("members"); setSearchQuery("") }}
+            onClick={() => {
+              setActiveTab("members");
+              setSearchQuery("");
+            }}
           >
             <Users size={16} />
             Members
@@ -290,7 +308,10 @@ export function RoomMembers({
 
           <button
             style={tabStyle(activeTab === "add")}
-            onClick={() => { setActiveTab("add"); setSearchQuery("") }}
+            onClick={() => {
+              setActiveTab("add");
+              setSearchQuery("");
+            }}
           >
             <UserPlus size={16} />
             Add Members
@@ -321,66 +342,65 @@ export function RoomMembers({
           {activeTab === "members" ? (
             <div style={contentStyle}>
               {/* Members */}
-              {filteredData && filteredData.map((member) => (
-                <div
-                  key={member._id}
-                  style={memberItemStyle}
-                >
-                  <div style={avatarStyle}> {getUserInitials(member.username)}
-                    <div
-                      style={statusMarkerStyle(member.status)}
+              {filteredData &&
+                filteredData.map((member) => (
+                  <div key={member._id} style={memberItemStyle}>
+                    <div style={avatarStyle}>
+                      {" "}
+                      {getUserInitials(member.username)}
+                      <div style={statusMarkerStyle(member.status)} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontWeight: "600",
+                          fontSize: "14px",
+                          color: colors.textColor,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        {member.username}
+                        {member._id === currentUser._id && (
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              color: colors.mutedText,
+                            }}
+                          >
+                            (You)
+                          </span>
+                        )}
+                        {member._id === room.members[0]._id && (
+                          <Crown
+                            size={12}
+                            style={{ color: "#f59e0b" }}
+                            title="Room Admin"
+                          />
+                        )}
+                      </p>
+                      <p
+                        style={{
+                          margin: "2px 0 0",
+                          fontSize: "12px",
+                          color: colors.mutedText,
+                        }}
+                      >
+                        {getStatusText(member.status)}
+                      </p>
+                    </div>
+                    <MessageCircle
+                      size={14}
+                      style={{ color: colors.mutedText }}
                     />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontWeight: "600",
-                        fontSize: "14px",
-                        color: colors.textColor,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      {member.username}
-                      {member._id === currentUser._id && (
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            color: colors.mutedText,
-                          }}
-                        >
-                          (You)
-                        </span>
-                      )}
-                      {member._id === room.members[0]._id && (
-                        <Crown
-                          size={12}
-                          style={{ color: "#f59e0b" }}
-                          title="Room Admin"
-                        />
-                      )}
-                    </p>
-                    <p
-                      style={{
-                        margin: "2px 0 0",
-                        fontSize: "12px",
-                        color: colors.mutedText,
-                      }}
-                    >
-                      {getStatusText(member.status)}
-                    </p>
-                  </div>
-                  <MessageCircle size={14} style={{ color: colors.mutedText }} />
-                </div>
-              ))}
+                ))}
             </div>
           ) : (
             <>
-              <div
-                style={contentStyle}
-              >
+              <div style={contentStyle}>
                 {/* <h4
                 style={{
                   fontSize: "14px",
@@ -391,13 +411,12 @@ export function RoomMembers({
               >
                 Suggested People
               </h4> */}
-                {
-                  filteredData && filteredData?.map((user) => (
+                {filteredData &&
+                  filteredData?.map((user) => (
                     <div key={user._id} style={addMemberItemStyle}>
-                      <div style={avatarStyle}>{getUserInitials(user.username)}
-                        <div
-                          style={statusMarkerStyle(user.status)}
-                        />
+                      <div style={avatarStyle}>
+                        {getUserInitials(user.username)}
+                        <div style={statusMarkerStyle(user.status)} />
                       </div>
                       <div style={{ flex: 1 }}>
                         <p
@@ -421,18 +440,26 @@ export function RoomMembers({
                           {/* Online • Mutual: 3 rooms */}
                         </p>
                       </div>
-                      <button style={addButtonStyle}>
+                      <button
+                        style={addButtonStyle}
+                        onClick={() => handleAddMembers(user._id)}
+                      >
                         <UserPlus size={12} />
                         Add
                       </button>
                     </div>
-                  )
-                  )
-                }
-
+                  ))}
               </div>
-              <div style={{ textAlign: "center", color: colors.mutedText, padding: 0 }}>
-                <p style={{ fontSize: "14px" }}>Suggested members will appear here.</p>
+              <div
+                style={{
+                  textAlign: "center",
+                  color: colors.mutedText,
+                  padding: 0,
+                }}
+              >
+                <p style={{ fontSize: "14px" }}>
+                  Suggested members will appear here.
+                </p>
               </div>
             </>
           )}

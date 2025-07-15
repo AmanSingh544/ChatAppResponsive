@@ -14,7 +14,7 @@ export interface Room {
   purpose: string;
   isPrivate: boolean;
   members: User[];
-  admin?: string,
+  admin?: string;
   lastMessage?: Message;
   unreadCount?: number;
 }
@@ -40,11 +40,11 @@ export interface RoomCreationData {
 export interface ApiResponse<T> {
   message?: string;
   data: T;
-};
+}
 
-export interface RoomMembers{
+export interface RoomMembers {
   members: string[];
-  roomId?: string
+  roomId?: string;
 }
 
 export type Purpose = "chat" | "gossip" | "education" | "study" | "work";
