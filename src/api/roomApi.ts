@@ -26,7 +26,7 @@ const joinRoom = async (roomId: string): Promise<Room>=> {
 }
 
 const addMembers = async (membersData: RoomMembers): Promise<Room> => {
-    const response = await apiClient.put<ApiResponse<Room>>(API_CONSTANTS.API_ENDPOINTS.ADD_MEMBER, {membersData});
+    const response = await apiClient.put<ApiResponse<Room>>(API_CONSTANTS.API_ENDPOINTS.ADD_MEMBER, membersData);
     return response.data?.data;
 }
 

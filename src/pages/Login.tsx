@@ -12,7 +12,7 @@ interface LoginPayload {
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
 
-    const {setLogin: saveUser} = useAuth();
+    const {setLogin: saveUser, setLogout} = useAuth();
     const navigate = useNavigate();
 
     const handleLogin = async (payload: LoginPayload) => {

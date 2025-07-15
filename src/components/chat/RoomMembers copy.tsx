@@ -16,7 +16,7 @@ interface RoomMembersProps {
   room: Room;
   currentUser: User;
   allUsers: User[];
-  onAddMembers?: () => void;
+  onAddMembers?: (user: []) => void;
   onRemoveMember?: (userId: string) => void;
   onPromoteMember?: (userId: string) => void;
 }

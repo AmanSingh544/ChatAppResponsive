@@ -24,7 +24,7 @@ interface ChatAreaProps {
   currentUser: User;
   allUsers: User[];
   onSendMessage: (content: string) => void;
-  onAddMembers: () => void;
+  onAddMembers: (users: []) => void;
 }
 
 const AVATAR_COLORS = [

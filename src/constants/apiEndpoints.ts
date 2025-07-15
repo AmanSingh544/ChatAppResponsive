@@ -1,5 +1,5 @@
-//const API_BASE_URL = 'https://jb10300w-3000.inc1.devtunnels.ms/'// 'http://localhost:3000/';
-const API_BASE_URL = 'https://chat-application-l78n.onrender.com/'; 
+const API_BASE_URL = "https://8xlcrj-3000.csb.app/"; // 'http://localhost:3000/';
+//const API_BASE_URL = 'https://chat-application-l78n.onrender.com/';
 
 const API_ENDPOINTS = {
   LOGIN: `api/auth/login`,
@@ -9,11 +9,11 @@ const API_ENDPOINTS = {
   GET_ALL_USERS: `api/user/alluser`,
   CREATE_ROOM: `api/user/room/create`,
   GET_ROOMS: `api/user/room/list`,
-  GET_ROOM_BY_ID: (roomId) =>  `api/user/room/${roomId}`,
+  GET_ROOM_BY_ID: (roomId) => `api/user/room/${roomId}`,
   JOIN_ROOM: (roomId) => `api/user/room/join/${roomId}`,
   ADD_MEMBER: `api/user/room/add_member`,
   AVAILABLE_ROOMS: `api/user/room/available_room`,
-  
+
   UPLOAD_IMAGE: `api/user/upload-image`,
   GET_USERS: `api/user/get-users`,
   GET_USER_BY_ID: (userId) => `api/user/${userId}`,
